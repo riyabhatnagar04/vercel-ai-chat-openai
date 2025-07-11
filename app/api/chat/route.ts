@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
 
   const apiKey = process.env.OPENAI_API_KEY;
 
-  const chatResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     }),
   });
 
-  const data = await chatResponse.json();
+  const data = await response.json();
 
   return new Response(JSON.stringify(data), {
     headers: {
@@ -29,3 +29,4 @@ export async function POST(req: NextRequest) {
     },
   });
 }
+

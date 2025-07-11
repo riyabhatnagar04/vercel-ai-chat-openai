@@ -1,23 +1,31 @@
-import { openai } from '@ai-sdk/openai';
-import { streamText } from 'ai';
+// app/api/chat/route.ts
+import { NextRequest } from "next/server";
 
-// Allow streaming responses up to 30 seconds
-export const maxDuration = 30;
+export const runtime = "edge";
 
-export async function POST(req: Request) {
-  // Extract the `messages` from the body of the request
-  const { messages } = await req.json();
+export async function POST(req: NextRequest) {
+  const body = await req.json();
 
-  // Call the language model
-  const result = await streamText({
-    model: openai('gpt-4-turbo'),
-    messages,
-    async onFinish({ text, toolCalls, toolResults, usage, finishReason }) {
-      // implement your own logic here, e.g. for storing messages
-      // or recording token usage
+  const apiKey = process.env.OPENAI_API_KEY;
+
+  const chatResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
     },
+    body: JSON.stringify({
+      model: "gpt-3.5-turbo",
+      messages: body.messages,
+    }),
   });
 
-  // Respond with the stream
-  return result.toAIStreamResponse();
+  const data = await chatResponse.json();
+
+  return new Response(JSON.stringify(data), {
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+    },
+  });
 }
